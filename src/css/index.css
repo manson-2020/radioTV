@@ -11,6 +11,7 @@
 
 body, header, div, main, ul, li {
     display: flex;
+    flex-direction: column;
 }
 
 html, body {
@@ -20,8 +21,8 @@ html, body {
     min-width: 1700px;
 }
 
-body, .fd-column {
-    flex-direction: column;
+.fd-row, .weather-item {
+    flex-direction: row;
 }
 
 li {
@@ -70,6 +71,10 @@ li {
     margin-bottom: 12px;
 }
 
+.mb-30 {
+    margin-bottom: 30px;
+}
+
 .fs-20 {
     font-size: 20px;
 }
@@ -87,21 +92,57 @@ li {
     color: #00ffff;
 }
 
+.progress-bar {
+    width: 45%;
+    height: 22px;
+    background-color: #fff;
+    border-radius: 20px;
+    background-image: radial-gradient(transparent, transparent), linear-gradient(to right, yellow, yellow, red);
+    background-size: 100%, 100%;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: all 0.2s;
+    color: #1d79f0;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+}
+
+.progress-bar:hover {
+    opacity: 1;
+}
+
+.left-area, .right-area {
+    width: 520px;
+}
+
+.repair-list {
+    overflow: hidden;
+}
+
 #population-container, #coverage-container, #attendance-container {
     margin-top: 12px;
-    width: 500px;
+    width: 100%;
+}
+
+#population-container, #attendance-container {
     height: 150px;
+}
+
+#coverage-container {
+    height: 220px;
 }
 
 #map-container {
     height: 530px;
-    width: 50%;
+    width: 60%;
 }
 
-#fieldworkTotal-container, #fieldwork-container, #fieldworkRatio-container, #total-container, #report-container, #complete-container {
+#total-container, #report-container, #complete-container {
     margin: 18px 0;
-    width: 500px;
     height: 30px;
+    width: 100%;
 }
 
 .nowrap {

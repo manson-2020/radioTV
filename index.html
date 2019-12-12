@@ -12,51 +12,52 @@
 
 <body>
     <header class="jc-center title">古县广播电视网络智慧平台</header>
-    <main class="container jc-sa f1">
-        <div class="left-area fd-column">
-            <div class="population border fd-column f1 jc-sa">
-                <p>古县人口: 91,798人</p>
-                <p>古县户数: 18,359户</p>
+    <main class="container jc-sa f1 fd-row">
+        <div class="left-area">
+            <div class="population border f1 jc-sa">
+                <p>古县人口：9.2 万人</p>
+                <p>古县户数：2.1 万户</p>
                 <div id="population-container"></div>
-                <p class="text-center">近五年数据折线图</p>
+                <!-- <p class="text-center">近五年数据折线图</p> -->
             </div>
-            <div class="coverage-rate border fd-column f1 jc-sa">
+            <div class="coverage-rate border f1 jc-sa">
                 <p class="label-title">广播电视覆盖率</p>
                 <div id="coverage-container"></div>
-                <p class="text-center">近五年广播电视覆盖率</p>
+                <!-- <p class="text-center">近五年广播电视覆盖率</p> -->
             </div>
-            <div class="attendance border fd-column f1 jc-sa">
+            <div class="attendance border f1 jc-sa">
                 <p class="label-title">维修出勤率</p>
                 <div id="attendance-container"></div>
-                <p class="text-center">近五年广播电视维修出勤率</p>
+                <!-- <p class="text-center">近五年广播电视维修出勤率</p> -->
             </div>
         </div>
-        <div class="center-area fd-column f1">
-            <div class="summary border jc-center ai-center">
+        <div class="center-area f1">
+            <div class="summary border jc-center ai-center fd-row">
                 <div id="map-container" class="ai-center"></div>
-                <div class="fd-column">
-                    <div id="fieldworkTotal-container"></div>
-                    <div id="fieldwork-container"></div>
-                    <div id="fieldworkRatio-container"></div>
+                <div class="f1 border">
+                    <div id="fieldworkTotal-container" class="ai-center mb-30"></div>
+                    <div id="fieldworkRatio-container" class="ai-center mb-30"></div>
+                    <div id="todayRepairOrder-container" class="ai-center mb-30"></div>
+                    <div id="todayRepairRecord-container" class="ai-center mb-30"></div>
                 </div>
             </div>
-            <div class="repair-list f1">
-                <div class="report border fd-column f1">
+            <div class="repair-list f1 fd-row">
+                <div class="report border f1">
                     <p class="label-title">报修订单列表</p>
                     <div id="reportOrderList-container"></div>
                 </div>
-                <div class="repairman border fd-column f1">
+                <div class="repairman border f1">
                     <p class="label-title">维修记录列表</p>
                     <div id="reportRecordList-container"></div>
                 </div>
             </div>
         </div>
-        <div class="right-area fd-column">
-            <div id="environmental-container" class="environmental border fd-column jc-sa"></div>
-            <div class="proportion-quantity border fd-column ai-center">
-                <div id="total-container"></div>
-                <div id="report-container"></div>
-                <div id="complete-container"></div>
+        <div class="right-area">
+            <div id="environmental-container" class="environmental border jc-sa"></div>
+            <div class="proportion-quantity border ai-center">
+                <div id="total-container" class="fd-row ai-center jc-center"></div>
+                <div id="report-container" class="fd-row ai-center jc-center"></div>
+                <div id="complete-container" class="fd-row ai-center jc-center"></div>
             </div>
             <div class="percentag-type border f1">
                 <p class="label-title">报修常见故障类型及占比</p>
@@ -66,7 +67,6 @@
 </body>
 
 <script type="text/javascript" src="src/js/index.js"></script>
-<!-- <script type="text/javascript" src="src/js/china.js"></script> -->
 <script type="text/javascript" src="src/js/shanxi.js"></script>
 
 <script type="text/javascript"> new Pages(); </script>

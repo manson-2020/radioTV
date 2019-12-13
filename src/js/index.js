@@ -1,20 +1,66 @@
 class Pages {
     constructor() {
-        this.timer();
+        fetch("http://fix.shdong.cn/api/daping/data").then(res => res.json()).then(res => {
+            this.charts("attendance", res.result.logsY);
+            this.charts("map", res.result.position);
+            this.getNumber(res.result.num);
+
+        });
         this.charts("population");
         this.charts("coverage");
-        this.charts("attendance");
-        this.charts("map");
+        this.charts("faultType");
+        this.dataTimer();
+        this.localInfoTimer();
     }
 
     $ = selector => document.querySelector(selector);
 
-    timer = _ => {
-        this.apiRequest();
-        setInterval(this.timer, 30000);
+    dataTimer = _ => {
+        clearInterval(this.preDataTimer);
+        this.refreshData();
+        this.preDataTimer = setInterval(this.dataTimer, 10000);
     }
 
-    charts(container) {
+    localInfoTimer = _ => {
+        clearInterval(this.preLocalInfoTimer);
+        this.getLocalInfo();
+        this.preLocalInfoTimer = setInterval(_ => {
+            this.localInfoTimer();
+            localStorage.removeItem("localInfo");
+        }, 10800000);
+    }
+
+    dateFormat(fmt, date) {
+        let ret;
+        let opt = {
+            "Y+": date.getFullYear().toString(),        // 年
+            "m+": (date.getMonth() + 1).toString(),     // 月
+            "d+": date.getDate().toString(),            // 日
+            "H+": date.getHours().toString(),           // 时
+            "M+": date.getMinutes().toString(),         // 分
+            "S+": date.getSeconds().toString()          // 秒
+            // 有其他格式化字符需求可以继续添加，必须转化成字符串
+        };
+        for (let k in opt) {
+            ret = new RegExp("(" + k + ")").exec(fmt);
+            if (ret) {
+                fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+            };
+        };
+        return fmt;
+    }
+
+    getBeforeDate(date, before) {
+        date.setDate(date.getDate() - before);
+        let dateArray = [];
+        for (let i = 0; i < before; i++) {
+            dateArray.push((date.getMonth() + 1) + "-" + date.getDate());
+            date.setDate(date.getDate() + 1);
+        }
+        return dateArray;
+    }
+
+    charts(container, data) {
         let option = {};
         switch (container) {
             case "population":
@@ -223,7 +269,7 @@ class Pages {
                     },
                     xAxis: {
                         type: 'category',
-                        data: ['2014', '2015', '2016', '2017', '2018', '2019', '2020'],
+                        data: this.getBeforeDate(new Date(), 7),
                         //设置轴线的属性
                         axisLine: {
                             lineStyle: {
@@ -233,7 +279,7 @@ class Pages {
                         //调整x轴的lable
                         axisLabel: {
                             textStyle: {
-                                fontSize: 10 // 让字体变小
+                                fontSize: 15 // 让字体变小
                             }
                         }
                     },
@@ -253,12 +299,17 @@ class Pages {
                             lineStyle: {
                                 color: '#6ab2ec',
                             }
+                        },
+                        axisLabel: {
+                            textStyle: {
+                                fontSize: 13 // 让字体变小
+                            }
                         }
                     },
                     /* 数据配置，若有多条折线则在数组中追加{name: , data: } */
                     series: [{
-                        name: '出勤率',
-                        data: [10, 23, 65, 36, 85, 43, 60],
+                        name: '出勤数',
+                        data,
                         type: 'line',
                         symbol: 'circle',
                         // 设置折点大小
@@ -279,6 +330,8 @@ class Pages {
                         show: true,
                         roam: true, //是否允许鼠标滚动放大，缩小
                         map: '山西',
+                        // bottom: "100",
+                        zoom: 4.5,
                         label: {//图形上的文本标签，可用于说明图形的一些数据信息
                             show: false, //是否显示文本
                             color: '#CCC', //文本颜色
@@ -295,16 +348,23 @@ class Pages {
                                 areaColor: '#0098c6'
                             }
                         },
+                        layoutCenter: ['90%', '-42%'],
+                        layoutSize: 450,
+                        regions: [{
+                            name: '临汾市',
+                            selected: true
+                        }]
 
                     },
                     tooltip: {
                         show: true,
+                        formatter: '{b}'
                     },
 
                     visualMap: {
                         show: false,
-                        min: 0, //最小值
-                        max: 600, //最大值
+                        min: 100, //最小值
+                        max: 300, //最大值
                         inRange: {
                             color: ['rgb(255,255,255)', 'rgb(153,211,232)', 'rgb(239,239,130)'] //颜色
                         },
@@ -316,9 +376,7 @@ class Pages {
                         {
                             type: 'effectScatter', //样试
                             coordinateSystem: 'geo', //该系列使用的坐标系
-                            data: [//数据
-                                { name: '', value: [111.5, 36.2, 330] }
-                            ],
+                            data,
                             itemStyle: {//样试。
                                 normal: {//默认样试
                                     color: '#d6f628'
@@ -326,9 +384,8 @@ class Pages {
                             },
                             label: {
                                 normal: {
-                                    formatter: '{b}',
                                     position: 'right',
-                                    show: true
+                                    show: false
                                 }
                             },
                             //标记的大小,可以设置数组或者函数返回值的形式
@@ -341,14 +398,104 @@ class Pages {
                     ]
                 };
                 break;
+            case "faultType":
+                option = {
+                    title: {
+                        text: '报修常见故障类型及占比',
+                        textStyle: {
+                            color: "#00ffff",
+                            fontSize: "22",
+                            fontWeight: "400"
+                        },
+                        x: 'center'
+                    },
+
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b}"
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                        bottom: "center",
+                        top: "center",
+                        data: ['网络故障: 33%', '信号异常: 30%', '设备故障: 17%', '其他故障: 15%', '基站故障: 5%'],
+                        textStyle: {
+                            color: "#",
+                            fontSize: "13"
+                        },
+                        show: false
+                    },
+                    color: ['#83a4d4', "#4286f4", '#12c2e9', '#FEAC5E', '#f64f59'],
+                    series: [
+                        {
+                            name: '报修故障类型占比',
+                            type: 'pie',
+                            radius: '45%',
+                            center: ['50%', '36%'],
+                            data: [
+                                { value: 33, name: '网络故障: 33%' },
+                                { value: 30, name: '信号异常: 30%' },
+                                { value: 17, name: '设备故障: 17%' },
+                                { value: 15, name: '其他故障: 15%' },
+                                { value: 5, name: '基站故障: 5%' }
+                            ],
+                            itemStyle: {
+                                emphasis: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            },
+                            label: {
+                                show: true,
+                                textStyle: {
+                                    fontSize: "15"
+                                }
+                            }
+                        }
+                    ]
+                };
+                break;
         }
         echarts.init(this.$(`#${container}-container`)).setOption(option);
     }
 
-    async apiRequest() {
-        const localInfo = await fetch("https://www.tianqiapi.com/api/?appid=61491654&appsecret=1Yg7THbh&version=v6&cityid=101100717").then(res => res.json())
+    getNumber(data) {
+        [
+            { id: "fieldworkTotal", text: "外勤总人数：", data: data.waiTotal, style: `margin-top: 12px;` },
+            { id: "fieldworkRatio", text: "外勤人数占比：", data: data.waiScale + "%", style: `background-size: 100%, ${data.waiScale}%; margin-top: 12px;` },
+            { id: "todayRepairOrder", text: "今日报修订单总数：", data: data.todayOrder, style: "margin-top: 12px;" },
+            { id: "todayRepairRecord", text: "今日维修记录总数：", data: data.todayLogs, style: "margin-top: 12px;" },
+            { id: "total", text: "总人数：", data: data.userTotal },
+            { id: "report", text: "报修订单：", data: data.orderTotal },
+            { id: "complete", text: "完成订单：", data: data.orderOver }
+        ].map(item => {
+            this.$(`#${item.id}-container`).innerHTML = `
+                <p>${item.text}</p>
+                <div class="progress-bar" style="${item.style}" title="${item.data}">
+                    <span style="width: 100%; ${((Number(item.data) || item.data == 0) && (item.text != "总人数：")) ? (item.data >= 80 ? `text-align: right;` : `padding-left: ${item.data}%`) : `text-align:center;`}">${item.data}</span>
+                </div>
+            `
+        })
+    }
 
-        this.$("#environmental-container").innerHTML = `
+    async getLocalInfo(localInfo) {
+        if (localStorage.getItem("localInfo")) {
+            localInfo = JSON.parse(localStorage.getItem("localInfo"));
+        } else {
+            localInfo = await fetch("https://www.tianqiapi.com/api/?appid=61491654&appsecret=1Yg7THbh&version=v6&cityid=101100717").then(res => res.json());
+            localStorage.setItem("localInfo", JSON.stringify(localInfo));
+        }
+
+        Object.keys(localInfo).forEach(key => {
+            if (!localInfo[key]) {
+                localInfo[key] = "暂缺";
+            }
+        });
+
+        if (localInfo.wea_img) {
+            this.$("#environmental-container").innerHTML = `
             <ul id="weather" class="jc-sa fd-column">
                 <li class="weather-item jc-sa ai-center">
                     <img src="./src/images/${localInfo.wea_img}.png" />
@@ -378,40 +525,29 @@ class Pages {
                 </li>
             </ul>
         `
+        } else {
+            this.$("#environmental-container").innerHTML = `<p class="text-center">${localInfo.errmsg}</p>`
+        }
+    }
 
-
-        const data = (await fetch("http://192.168.1.12:9002/api/daping/data").then(res => res.json())).result;
+    async refreshData() {
+        const data = (await fetch("http://fix.shdong.cn/api/daping/lists").then(res => res.json())).result;
         [
             { id: "reportOrderList", param: "order" },
             { id: "reportRecordList", param: "logs" }
-        ].map(item => {
+        ].forEach(item => {
             this.$(`#${item.id}-container`).innerHTML = `
             <table class="table f1" border="1">
                 <tbody>
                 ${data[item.param].map(item => (
                 `<tr>
                     <td>${item.name}</td>
-                    <td>${item.text}</td>
+                    <td title="${item.text}">${(item.text.length > 7) ? (item.text.substring(0, 7) + "...") : item.text}</td>
                     <td>${item.time}</td>
                 </tr>`
             )).join(String())}
                 </tbody>
             </table>`
         });
-
-        [
-            { id: "fieldworkTotal", text: "外勤总人数：", data: data.waiTotal, style: "margin-top: 12px;" },
-            { id: "fieldworkRatio", text: "外勤人数占比：", data: data.waiTotal + "%", style: `background-size: 100%, ${data.waiScale}%; margin-top: 12px;` },
-            { id: "todayRepairOrder", text: "今日报修订单总数：", data: data.todayOrder, style: "margin-top: 12px;" },
-            { id: "todayRepairRecord", text: "今日维修记录总数：", data: data.todayLogs, style: "margin-top: 12px;" },
-            { id: "total", text: "今日维修记录总数：", data: data.waiTotal },
-            { id: "report", text: "今日维修记录总数：", data: data.orderTotal },
-            { id: "complete", text: "今日维修记录总数：", data: data.orderOver }
-        ].map(item => {
-            this.$(`#${item.id}-container`).innerHTML = `
-                <p>${item.text}</p>
-                <div class="progress-bar" style="${item.style}">${item.data}</div>
-            `
-        })
     }
 }

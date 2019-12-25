@@ -16,17 +16,17 @@ class Pages {
     $ = selector => document.querySelector(selector);
 
     dataTimer = _ => {
-        clearInterval(this.preDataTimer);
+        clearTimeout(this.preDataTimer);
         this.refreshData();
-        this.preDataTimer = setInterval(this.dataTimer, 10000);
+        this.preDataTimer = setTimeout(this.dataTimer, 10000);
     }
 
     localInfoTimer = _ => {
-        clearInterval(this.preLocalInfoTimer);
+        clearTimeout(this.preLocalInfoTimer);
         this.getLocalInfo();
-        this.preLocalInfoTimer = setInterval(_ => {
+        this.preLocalInfoTimer = setTimeout(_ => {
             this.localInfoTimer();
-            localStorage.removeItem("localInfo");
+            sessionStorage.removeItem("localInfo");
         }, 10800000);
     }
 
@@ -481,11 +481,11 @@ class Pages {
     }
 
     async getLocalInfo(localInfo) {
-        if (localStorage.getItem("localInfo")) {
-            localInfo = JSON.parse(localStorage.getItem("localInfo"));
+        if (sessionStorage.getItem("localInfo")) {
+            localInfo = JSON.parse(sessionStorage.getItem("localInfo"));
         } else {
             localInfo = await fetch("https://www.tianqiapi.com/api/?appid=61491654&appsecret=1Yg7THbh&version=v6&cityid=101100717").then(res => res.json());
-            localStorage.setItem("localInfo", JSON.stringify(localInfo));
+            sessionStorage.setItem("localInfo", JSON.stringify(localInfo));
         }
 
         Object.keys(localInfo).forEach(key => {
